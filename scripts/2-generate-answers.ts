@@ -63,7 +63,7 @@ const CONFIG = {
   // Model selection (OpenRouter)
   model: "google/gemini-2.5-flash",
 
-  maxTokens: 1200, // Increased for detailed answers with code snippets
+  maxTokens: 10000, // Increased for detailed answers with code snippets
   temperature: 0.7,
   maxRetries: 3,
   retryDelay: 3000, // 5 seconds
@@ -92,7 +92,9 @@ function getSystemPrompt(tags: string): string {
   if (tagsLower.includes("behavioral")) {
     return `You are an expert career coach. Provide structured behavioral interview answers using STAR framework (Situation, Task, Action, Result).
 
-Format in Markdown with clear headings. Keep it practical and focused. Include code examples only when relevant.`;
+**Format:** Markdown with clear headings. Keep it practical and focused.
+**Include:** Multiple scenarios when necessary.
+`;
   }
 
   if (tagsLower.includes("system") || tagsLower.includes("architecture")) {
