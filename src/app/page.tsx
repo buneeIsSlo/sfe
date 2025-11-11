@@ -37,7 +37,7 @@ export default function Home() {
       // dynamic imports for client-side only; basic version loads both
       const [{ default: qs }, { default: withAnswers }]: [
         { default: Question[] },
-        { default: AnswerItem[] }
+        { default: AnswerItem[] },
       ] = await Promise.all([
         import("../../data/fe-questions.json"),
         import("../../data/fe-questions-with-answers.json"),
@@ -58,7 +58,7 @@ export default function Home() {
             difficulty: q.difficulty,
           }))
           // sort descending by id so newest first (matches file top ordering)
-          .sort((a, b) => b.id - a.id)
+          .sort((a, b) => b.id - a.id),
       );
 
       // build id -> answer map (skip nulls)
@@ -84,9 +84,9 @@ export default function Home() {
   }, [questions, activeId, answerById]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-4 py-12">
-        <header className="mb-8 flex justify-between items-center">
+        <header className="mb-8 flex items-center justify-between">
           <div className="">
             <h1 className="text-2xl font-semibold tracking-tight">
               Frontend Interview Prep
@@ -107,7 +107,7 @@ export default function Home() {
             {questions.map((q) => (
               <Card
                 key={q.id}
-                className="cursor-pointer hover:bg-accent/30 focus:outline-none focus-visible:ring-1 focus-visible:ring-ring/60"
+                className="hover:bg-accent/30 focus-visible:ring-ring/60 cursor-pointer focus:outline-none focus-visible:ring-1"
                 onClick={() => {
                   setActiveId(q.id);
                   setOpen(true);
@@ -124,11 +124,11 @@ export default function Home() {
                           if (match) {
                             const questionNubmer = match[0];
                             const question = q.title.slice(
-                              questionNubmer.length
+                              questionNubmer.length,
                             );
                             return (
-                              <p className="flex gap-2 items-baseline">
-                                <span className="font-mono text-primary/80">
+                              <p className="flex items-baseline gap-2">
+                                <span className="text-primary/80 font-mono">
                                   {questionNubmer}
                                 </span>
                                 <span>{question}</span>

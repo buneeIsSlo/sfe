@@ -28,19 +28,23 @@ interface AnswerDrawerProps {
   active: AnswerItem | null;
 }
 
-export function AnswerDrawer({ open, onOpenChange, active }: AnswerDrawerProps) {
+export function AnswerDrawer({
+  open,
+  onOpenChange,
+  active,
+}: AnswerDrawerProps) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="rounded-t-2xl max-w-4xl mx-auto data-[vaul-drawer-direction=bottom]:max-h-[90vh] data-[vaul-drawer-direction=top]:max-h-[90vh]">
-        <div className="flex flex-col h-full overflow-hidden">
-          <DrawerHeader className="p-0 text-left shrink-0">
+      <DrawerContent className="mx-auto max-w-4xl rounded-t-2xl data-[vaul-drawer-direction=bottom]:max-h-[90vh] data-[vaul-drawer-direction=top]:max-h-[90vh]">
+        <div className="flex h-full flex-col overflow-hidden">
+          <DrawerHeader className="shrink-0 p-0 text-left">
             {active ? (
               <div className="w-full">
-                <div className="px-4 pb-3 pt-4">
-                  <DrawerTitle className="text-lg font-semibold text-left select-text">
+                <div className="px-4 pt-4 pb-3">
+                  <DrawerTitle className="text-left text-lg font-semibold select-text">
                     {active.title}
                   </DrawerTitle>
-                  <p className="text-muted-foreground mt-1 text-xs text-left select-text">
+                  <p className="text-muted-foreground mt-1 text-left text-xs select-text">
                     #{active.id} • {active.tags} • {active.difficulty}
                   </p>
                 </div>
@@ -54,7 +58,7 @@ export function AnswerDrawer({ open, onOpenChange, active }: AnswerDrawerProps) 
           </DrawerHeader>
           <div className="flex-1 overflow-y-auto overscroll-contain">
             {active && (
-              <div className="px-4 py-4 text-sm leading-7 text-left select-text">
+              <div className="px-4 py-4 text-left text-sm leading-7 select-text">
                 {active.answer ? (
                   <RenderMarkdown>{active.answer}</RenderMarkdown>
                 ) : (
