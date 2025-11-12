@@ -16,15 +16,20 @@ type Question = {
   difficulty: string;
 };
 
-type AnswerItem = Question & {
-  answer: string | null;
-};
-
-interface QuestionsClientProps {
+interface QuestionsProps {
   questions: Question[];
+  filters?: {
+    difficulties: string[];
+    tags: string[];
+  };
+  searchQuery?: string;
 }
 
-export function QuestionsClient({ questions }: QuestionsClientProps) {
+export function Questions({
+  questions,
+  filters,
+  searchQuery = "",
+}: QuestionsProps) {
   const [answerById, setAnswerById] = useState<Record<number, string>>({});
   const [open, setOpen] = useState(false);
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -56,6 +61,25 @@ export function QuestionsClient({ questions }: QuestionsClientProps) {
     };
   }, []);
 
+  // Compute filtered list
+  const filteredQuestions = useMemo(() => {
+    let base: Question[] = questions;
+    if (filters?.difficulties?.length) {
+      base = base.filter((item) =>
+        filters.difficulties.includes(item.difficulty),
+      );
+    }
+    if (filters?.tags?.length) {
+      base = base.filter((item) => filters.tags.includes(item.tags));
+    }
+    // Search filter - matches title (case-insensitive)
+    if (searchQuery.trim()) {
+      const query = searchQuery.trim().toLowerCase();
+      base = base.filter((item) => item.title.toLowerCase().includes(query));
+    }
+    return base;
+  }, [filters, questions, searchQuery]);
+
   const active = useMemo(() => {
     if (!questions || activeId == null) return null;
     const q = questions.find((x) => x.id === activeId);
@@ -69,7 +93,7 @@ export function QuestionsClient({ questions }: QuestionsClientProps) {
   return (
     <>
       <div className="grid gap-4">
-        {questions.map((q) => (
+        {filteredQuestions.map((q) => (
           <Card
             key={q.id}
             className="hover:bg-accent/30 focus-visible:ring-ring/60 cursor-pointer focus:outline-none focus-visible:ring-1"
@@ -101,10 +125,7 @@ export function QuestionsClient({ questions }: QuestionsClientProps) {
                     })()}
                   </CardTitle>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                    <Badge
-                      // variant={getTagColor(q.tags).variant}
-                      className={getTagColor(q.tags).className}
-                    >
+                    <Badge className={getTagColor(q.tags).className}>
                       {q.tags}
                     </Badge>
                     <span className="text-muted-foreground text-xs">•</span>

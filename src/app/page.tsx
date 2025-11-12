@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import questionsData from "@/data/fe-questions.json";
-import { QuestionsClient } from "./questions-client";
-import ThemeToggle from "@/components/ui/theme-toggle";
+import { QuestionsPageClient } from "./questions-client-wrapper";
+import { Spinner } from "@/components/ui/spinner";
 
 type Question = {
   id: number;
@@ -28,22 +29,14 @@ export default function Home() {
     .sort((a, b) => a.id - b.id);
 
   return (
-    <div className="bg-background text-foreground min-h-screen">
-      <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-4 py-12">
-        <header className="mb-8 flex items-center justify-between">
-          <div className="">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Frontend Interview Prep
-            </h1>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Tap a question to view the answer.
-            </p>
-          </div>
-          <ThemeToggle />
-        </header>
-
-        <QuestionsClient questions={questions} />
-      </main>
-    </div>
+    <Suspense
+      fallback={
+        <div className="mx-auto flex h-full min-h-screen w-full max-w-3xl flex-col px-4 py-12">
+          <Spinner className="mx-auto" />
+        </div>
+      }
+    >
+      <QuestionsPageClient questions={questions} />
+    </Suspense>
   );
 }
