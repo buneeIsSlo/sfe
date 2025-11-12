@@ -244,7 +244,7 @@ async function generateWithRetry(
  * Load progress from file
  */
 function loadProgress(): Progress {
-  const progressPath = path.join(process.cwd(), "data", "progress.json");
+  const progressPath = path.join(process.cwd(), "src", "data", "progress.json");
 
   try {
     if (fs.existsSync(progressPath)) {
@@ -267,7 +267,7 @@ function loadProgress(): Progress {
  * Save progress to file
  */
 function saveProgress(progress: Progress) {
-  const progressPath = path.join(process.cwd(), "data", "progress.json");
+  const progressPath = path.join(process.cwd(), "src", "data", "progress.json");
   fs.writeFileSync(progressPath, JSON.stringify(progress, null, 2));
 }
 
@@ -277,12 +277,13 @@ function saveProgress(progress: Progress) {
 function saveFinalResults(results: QuestionWithAnswer[]) {
   const outputPath = path.join(
     process.cwd(),
+    "src",
     "data",
     "fe-questions-with-answers.json",
   );
   fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
   console.log(
-    `\n💾 Saved ${results.length} questions with answers to data/fe-questions-with-answers.json`,
+    `\n💾 Saved ${results.length} questions with answers to src/data/fe-questions-with-answers.json`,
   );
 }
 
@@ -320,8 +321,13 @@ async function generateAllAnswers() {
 
   try {
     // 1. Load questions
-    const questionsPath = path.join(process.cwd(), "data", "fe-questions.json");
-    console.log("📖 Loading questions from data/fe-questions.json...");
+    const questionsPath = path.join(
+      process.cwd(),
+      "src",
+      "data",
+      "fe-questions.json",
+    );
+    console.log("📖 Loading questions from src/data/fe-questions.json...");
 
     if (!fs.existsSync(questionsPath)) {
       throw new Error(
@@ -452,7 +458,7 @@ async function generateAllAnswers() {
     }
 
     console.log(
-      "\n✅ All done! Your questions are ready in data/fe-questions-with-answers.json",
+      "\n✅ All done! Your questions are ready in src/data/fe-questions-with-answers.json",
     );
     console.log("📝 Next: Import this JSON into your Next.js app");
   } catch (error) {

@@ -45,7 +45,7 @@ interface PreparedQuestion extends RawQuestion {
  */
 function inferDifficulty(
   tags: string,
-  title: string
+  title: string,
 ): "Easy" | "Medium" | "Hard" {
   const tagsLower = tags.toLowerCase();
   const titleLower = title.toLowerCase();
@@ -92,7 +92,7 @@ async function prepareQuestions() {
 
     if (!fs.existsSync(questionsPath)) {
       throw new Error(
-        "questions.txt not found! Make sure it exists in the root directory."
+        "questions.txt not found! Make sure it exists in the root directory.",
       );
     }
 
@@ -105,7 +105,7 @@ async function prepareQuestions() {
 
     if (rawQuestions.length === 0) {
       throw new Error(
-        "No questions found in questions.txt! Check the file structure."
+        "No questions found in questions.txt! Check the file structure.",
       );
     }
 
@@ -119,7 +119,7 @@ async function prepareQuestions() {
 
         if ((index + 1) % 50 === 0) {
           console.log(
-            `   Processed ${index + 1}/${rawQuestions.length} questions...`
+            `   Processed ${index + 1}/${rawQuestions.length} questions...`,
           );
         }
 
@@ -137,14 +137,19 @@ async function prepareQuestions() {
           completed: false,
           lastUpdated: null,
         };
-      }
+      },
     );
 
     console.log(`✓ Prepared ${preparedQuestions.length} questions\n`);
 
-    // 4. Save to data/fe-questions.json
-    const outputPath = path.join(process.cwd(), "data", "fe-questions.json");
-    console.log("💾 Saving to data/fe-questions.json...");
+    // 4. Save to src/data/fe-questions.json
+    const outputPath = path.join(
+      process.cwd(),
+      "src",
+      "data",
+      "fe-questions.json",
+    );
+    console.log("💾 Saving to src/data/fe-questions.json...");
 
     fs.writeFileSync(outputPath, JSON.stringify(preparedQuestions, null, 2));
 
@@ -162,26 +167,26 @@ async function prepareQuestions() {
     console.log(`   Total Questions: ${stats.total}`);
     console.log(
       `   Easy: ${stats.easy} (${Math.round(
-        (stats.easy / stats.total) * 100
-      )}%)`
+        (stats.easy / stats.total) * 100,
+      )}%)`,
     );
     console.log(
       `   Medium: ${stats.medium} (${Math.round(
-        (stats.medium / stats.total) * 100
-      )}%)`
+        (stats.medium / stats.total) * 100,
+      )}%)`,
     );
     console.log(
       `   Hard: ${stats.hard} (${Math.round(
-        (stats.hard / stats.total) * 100
-      )}%)`
+        (stats.hard / stats.total) * 100,
+      )}%)`,
     );
     console.log(`   With Companies: ${stats.withCompanies}`);
 
     console.log(
-      "\n✅ Success! Questions prepared and saved to data/fe-questions.json"
+      "\n✅ Success! Questions prepared and saved to src/data/fe-questions.json",
     );
     console.log(
-      '\n📝 Next step: Run "npm run generate-answers" to generate AI answers'
+      '\n📝 Next step: Run "npm run generate-answers" to generate AI answers',
     );
   } catch (error) {
     console.error("\n❌ Error preparing questions:", error);
