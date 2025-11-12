@@ -187,7 +187,7 @@ async function generateAnswer(question: Question): Promise<string> {
         temperature: CONFIG.temperature,
         max_tokens: CONFIG.maxTokens,
       }),
-    }
+    },
   );
 
   if (!response.ok) {
@@ -209,7 +209,7 @@ async function generateAnswer(question: Question): Promise<string> {
     console.log(
       `   Tokens: ${data.usage.prompt_tokens} → ${
         data.usage.completion_tokens
-      } | Cost: $${totalCost.toFixed(4)}`
+      } | Cost: $${totalCost.toFixed(4)}`,
     );
   }
 
@@ -221,18 +221,18 @@ async function generateAnswer(question: Question): Promise<string> {
  */
 async function generateWithRetry(
   question: Question,
-  attempt = 1
+  attempt = 1,
 ): Promise<string> {
   try {
     return await generateAnswer(question);
-  } catch (error: any) {
+  } catch (error) {
     if (attempt >= CONFIG.maxRetries) {
       throw error;
     }
 
     const delay = CONFIG.retryDelay * attempt; // Exponential backoff
     console.log(
-      `   ⚠️  Retry ${attempt}/${CONFIG.maxRetries} after ${delay}ms...`
+      `   ⚠️  Retry ${attempt}/${CONFIG.maxRetries} after ${delay}ms...`,
     );
     await sleep(delay);
 
@@ -252,7 +252,7 @@ function loadProgress(): Progress {
       return JSON.parse(data);
     }
   } catch (error) {
-    console.log("⚠️  Could not load progress, starting fresh");
+    console.log("⚠️  Could not load progress, starting fresh", error);
   }
 
   return {
@@ -278,11 +278,11 @@ function saveFinalResults(results: QuestionWithAnswer[]) {
   const outputPath = path.join(
     process.cwd(),
     "data",
-    "fe-questions-with-answers.json"
+    "fe-questions-with-answers.json",
   );
   fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
   console.log(
-    `\n💾 Saved ${results.length} questions with answers to data/fe-questions-with-answers.json`
+    `\n💾 Saved ${results.length} questions with answers to data/fe-questions-with-answers.json`,
   );
 }
 
@@ -296,7 +296,7 @@ function sleep(ms: number): Promise<void> {
 /**
  * Validate answer quality
  */
-function validateAnswer(answer: string, question: Question): boolean {
+function validateAnswer(answer: string): boolean {
   // Minimum length check
   if (answer.length < 50) {
     console.log("   ⚠️  Answer too short, may need regeneration");
@@ -325,12 +325,12 @@ async function generateAllAnswers() {
 
     if (!fs.existsSync(questionsPath)) {
       throw new Error(
-        'fe-questions.json not found! Run "npm run prepare-questions" first.'
+        'fe-questions.json not found! Run "npm run prepare-questions" first.',
       );
     }
 
     let questions: Question[] = JSON.parse(
-      fs.readFileSync(questionsPath, "utf-8")
+      fs.readFileSync(questionsPath, "utf-8"),
     );
 
     // Apply test mode limit if configured
@@ -347,7 +347,7 @@ async function generateAllAnswers() {
 
     if (startIndex > 0) {
       console.log(
-        `📝 Resuming from question ${startIndex + 1}/${questions.length}`
+        `📝 Resuming from question ${startIndex + 1}/${questions.length}`,
       );
       console.log(`   Already processed: ${progress.results.length} questions`);
       console.log(`   Total cost so far: $${progress.totalCost.toFixed(4)}\n`);
@@ -357,7 +357,7 @@ async function generateAllAnswers() {
     console.log(`🤖 Using model: ${CONFIG.model}`);
     console.log(`💰 Budget limit: $${CONFIG.maxBudget}`);
     console.log(
-      `⏱️  Rate limit: ${CONFIG.requestsPerMinute} requests/minute\n`
+      `⏱️  Rate limit: ${CONFIG.requestsPerMinute} requests/minute\n`,
     );
 
     let successCount = progress.results.length;
@@ -371,14 +371,14 @@ async function generateAllAnswers() {
       try {
         console.log(`${progressText} ${question.title}`);
         console.log(
-          `   Tags: ${question.tags} | Difficulty: ${question.difficulty}`
+          `   Tags: ${question.tags} | Difficulty: ${question.difficulty}`,
         );
 
         // Generate answer
         const answer = await generateWithRetry(question);
 
         // Validate
-        if (!validateAnswer(answer, question)) {
+        if (!validateAnswer(answer)) {
           console.log(`   ⚠️  Answer validation failed, but continuing...`);
         }
 
@@ -412,9 +412,9 @@ async function generateAllAnswers() {
         if (i < questions.length - 1) {
           await sleep(CONFIG.delayBetweenRequests);
         }
-      } catch (error: any) {
+      } catch (error) {
         failCount++;
-        console.error(`${progressText} ❌ Failed: ${error.message}\n`);
+        console.error(`${progressText} ❌ Failed: ${error}\n`);
 
         // Save progress even on failure
         saveProgress(progress);
@@ -439,7 +439,7 @@ async function generateAllAnswers() {
 
     if (failCount > 0) {
       console.log(
-        `\n⚠️  ${failCount} questions failed. Check logs above for details.`
+        `\n⚠️  ${failCount} questions failed. Check logs above for details.`,
       );
       console.log(`You can re-run this script to retry failed questions.`);
     }
@@ -452,12 +452,11 @@ async function generateAllAnswers() {
     }
 
     console.log(
-      "\n✅ All done! Your questions are ready in data/fe-questions-with-answers.json"
+      "\n✅ All done! Your questions are ready in data/fe-questions-with-answers.json",
     );
     console.log("📝 Next: Import this JSON into your Next.js app");
-  } catch (error: any) {
-    console.error("\n❌ Fatal error:", error.message);
-    console.error("\nStack trace:", error.stack);
+  } catch (error) {
+    console.error("\n❌ Fatal error:", error);
     process.exit(1);
   }
 }
