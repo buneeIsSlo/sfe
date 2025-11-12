@@ -7,6 +7,8 @@ import {
 import { RenderMarkdown } from "@/components/ui/render-markdown";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/components/ui/badge";
+import { getDifficultyColors, getTagColor } from "@/lib/utils";
 
 type Question = {
   id: number;
@@ -44,9 +46,17 @@ export function AnswerDrawer({
                   <DrawerTitle className="text-left text-lg font-semibold select-text">
                     {active.title}
                   </DrawerTitle>
-                  <p className="text-muted-foreground mt-1 text-left text-xs select-text">
-                    #{active.id} • {active.tags} • {active.difficulty}
-                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-left">
+                    <Badge className={getTagColor(active.tags).className}>
+                      {active.tags}
+                    </Badge>
+                    <span className="text-muted-foreground text-xs">•</span>
+                    <span
+                      className={`text-xs ${getDifficultyColors(active.difficulty)}`}
+                    >
+                      {active.difficulty}
+                    </span>
+                  </div>
                 </div>
                 <Separator />
               </div>

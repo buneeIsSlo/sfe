@@ -2,12 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnswerDrawer } from "@/components/answer-drawer";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { getDifficultyColors, getTagColor } from "@/lib/utils";
 
 type Question = {
   id: number;
@@ -103,9 +100,20 @@ export function QuestionsClient({ questions }: QuestionsClientProps) {
                       return q.title;
                     })()}
                   </CardTitle>
-                  <CardDescription className="truncate">
-                    {q.tags} • {q.difficulty}
-                  </CardDescription>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                    <Badge
+                      // variant={getTagColor(q.tags).variant}
+                      className={getTagColor(q.tags).className}
+                    >
+                      {q.tags}
+                    </Badge>
+                    <span className="text-muted-foreground text-xs">•</span>
+                    <span
+                      className={`text-xs ${getDifficultyColors(q.difficulty)}`}
+                    >
+                      {q.difficulty}
+                    </span>
+                  </div>
                 </div>
               </div>
             </CardHeader>
