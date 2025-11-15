@@ -78,7 +78,7 @@ export function QuestionsPageClient({ questions }: QuestionsPageClientProps) {
   }, [filters, searchQuery, router, allDifficulties.length]);
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl flex-col px-4 py-12">
+    <div className="relative z-10 mx-auto flex min-h-screen max-w-3xl flex-col px-4 py-12">
       <header className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">

@@ -96,7 +96,7 @@ export function Questions({
         {filteredQuestions.map((q) => (
           <Card
             key={q.id}
-            className="hover:bg-accent/30 focus-visible:ring-ring/60 cursor-pointer focus:outline-none focus-visible:ring-1"
+            className="hover:bg-accent/20 focus-visible:ring-ring/60 cursor-pointer backdrop-blur-sm focus:outline-none focus-visible:ring-1"
             onClick={() => {
               setActiveId(q.id);
               setOpen(true);

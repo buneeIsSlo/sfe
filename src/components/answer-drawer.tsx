@@ -37,7 +37,7 @@ export function AnswerDrawer({
 }: AnswerDrawerProps) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="mx-auto max-w-4xl rounded-t-2xl data-[vaul-drawer-direction=bottom]:max-h-[90vh] data-[vaul-drawer-direction=top]:max-h-[90vh]">
+      <DrawerContent className="border-secondary mx-auto max-w-4xl rounded-t-2xl border-2 data-[vaul-drawer-direction=bottom]:max-h-[90vh] data-[vaul-drawer-direction=top]:max-h-[90vh]">
         <div className="flex h-full flex-col overflow-hidden">
           <DrawerHeader className="shrink-0 p-0 text-left">
             {active ? (

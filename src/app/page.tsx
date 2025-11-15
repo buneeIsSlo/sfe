@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import questionsData from "@/data/fe-questions.json";
 import { QuestionsPageClient } from "./questions-client-wrapper";
 import { Spinner } from "@/components/ui/spinner";
+import { GridPattern } from "../components/grid-pattern";
+import { cn } from "@/lib/utils";
 
 type Question = {
   id: number;
@@ -25,7 +27,6 @@ export default function Home() {
       createdAt: q.createdAt,
       difficulty: q.difficulty,
     }))
-    // sort descending by id so newest first (matches file top ordering)
     .sort((a, b) => a.id - b.id);
 
   return (
@@ -36,6 +37,17 @@ export default function Home() {
         </div>
       }
     >
+      <GridPattern
+        width={150}
+        height={150}
+        x={-1}
+        y={-1}
+        strokeDasharray={"8 4"}
+        className={cn(
+          "mask-[radial-gradient(800px_circle_at_center_bottom,white,transparent)]",
+          "fixed inset-0",
+        )}
+      />
       <QuestionsPageClient questions={questions} />
     </Suspense>
   );
