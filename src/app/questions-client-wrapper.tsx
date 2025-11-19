@@ -2,9 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import ThemeToggle from "@/components/ui/theme-toggle";
 import { QuestionFilters } from "@/components/question-filters";
 import { Questions } from "./questions";
+import { Button } from "@/components/ui/button";
+import { BookOpen } from "lucide-react";
 
 type Question = {
   id: number;
@@ -88,7 +91,15 @@ export function QuestionsPageClient({ questions }: QuestionsPageClientProps) {
             {`Showing ${questions.length} questions`}
           </p>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/quiz">
+              <BookOpen className="mr-2 size-4" />
+              Quiz Mode
+            </Link>
+          </Button>
+          <ThemeToggle />
+        </div>
       </header>
 
       <QuestionFilters
