@@ -239,8 +239,7 @@ export function QuizClient({ questions }: QuizClientProps) {
 
   return (
     <div className="relative flex min-h-screen flex-col">
-      {/* Header */}
-      <div className="relative z-10 mx-auto w-full max-w-5xl px-4 pt-6">
+      <div className="relative z-10 mx-auto w-full max-w-3xl pt-6">
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/">
@@ -317,9 +316,9 @@ export function QuizClient({ questions }: QuizClientProps) {
       {/* Main Content */}
       <div className="relative z-10 flex flex-1 items-center justify-center px-4 py-8">
         {currentQuestion ? (
-          <Card className="relative flex h-[600px] w-full max-w-4xl flex-col overflow-hidden shadow-xl">
+          <Card className="relative flex h-[600px] w-full max-w-3xl flex-col overflow-hidden shadow-xl">
             <Button
-              variant="ghost"
+              variant="secondary"
               size="icon"
               onClick={handlePrevious}
               disabled={!canGoPrevious}
@@ -329,7 +328,7 @@ export function QuizClient({ questions }: QuizClientProps) {
               <ChevronLeft className="size-6" />
             </Button>
             <Button
-              variant="ghost"
+              variant="secondary"
               size="icon"
               onClick={handleNext}
               disabled={!canGoNext}
