@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useReducer } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AnswerDrawer } from "@/components/answer-drawer";
@@ -40,53 +40,128 @@ interface QuizClientProps {
 const SEEN_QUESTIONS_KEY = "quiz-seen-questions";
 const HISTORY_KEY = "quiz-history";
 
-export function QuizClient({ questions }: QuizClientProps) {
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [seenQuestionIds, setSeenQuestionIds] = useState<Set<number>>(
-    new Set(),
-  );
-  const [questionHistory, setQuestionHistory] = useState<number[]>([]);
-  const [currentHistoryIndex, setCurrentHistoryIndex] = useState<number>(0);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+interface QuizState {
+  currentQuestion: Question | null;
+  seenQuestionIds: Set<number>;
+  questionHistory: number[];
+  currentHistoryIndex: number;
+  isInitialized: boolean;
+}
 
-  // Load state from storage on mount
-  useEffect(() => {
-    try {
-      // Load seen questions from localStorage
-      const storedSeen = localStorage.getItem(SEEN_QUESTIONS_KEY);
-      if (storedSeen) {
-        setSeenQuestionIds(new Set(JSON.parse(storedSeen)));
+type QuizAction =
+  | { type: "INITIALIZE"; payload: Omit<QuizState, "isInitialized"> }
+  | { type: "SET_QUESTION"; payload: { question: Question; historyIndex: number } }
+  | { type: "NEXT_QUESTION"; payload: { question: Question; newHistory: number[]; newHistoryIndex: number; newSeenIds: Set<number> } }
+  | { type: "RESET"; payload: { question: Question } };
+
+function quizReducer(state: QuizState, action: QuizAction): QuizState {
+  switch (action.type) {
+    case "INITIALIZE":
+      return { ...action.payload, isInitialized: true };
+    case "SET_QUESTION":
+      return {
+        ...state,
+        currentQuestion: action.payload.question,
+        currentHistoryIndex: action.payload.historyIndex,
+      };
+    case "NEXT_QUESTION":
+      return {
+        ...state,
+        currentQuestion: action.payload.question,
+        questionHistory: action.payload.newHistory,
+        currentHistoryIndex: action.payload.newHistoryIndex,
+        seenQuestionIds: action.payload.newSeenIds,
+      };
+    case "RESET":
+      return {
+        ...state,
+        seenQuestionIds: new Set([action.payload.question.id]),
+        questionHistory: [action.payload.question.id],
+        currentQuestion: action.payload.question,
+        currentHistoryIndex: 0,
+      };
+    default:
+      return state;
+  }
+}
+
+// Helper to load initial state from storage
+function loadInitialState(questions: Question[]): Omit<QuizState, "isInitialized"> {
+  try {
+    const storedSeen = localStorage.getItem(SEEN_QUESTIONS_KEY);
+    const storedHistory = sessionStorage.getItem(HISTORY_KEY);
+
+    const seenIds = storedSeen ? new Set<number>(JSON.parse(storedSeen)) : new Set<number>();
+    const history: number[] = storedHistory ? JSON.parse(storedHistory) : [];
+
+    let currentQ: Question | null = null;
+    let historyIndex = 0;
+
+    if (history.length > 0) {
+      const lastIndex = history.length - 1;
+      historyIndex = lastIndex;
+      const lastQuestionId = history[lastIndex];
+      const lastQuestion = questions.find((q) => q.id === lastQuestionId);
+      if (lastQuestion) {
+        currentQ = lastQuestion;
       }
-
-      // Load history from sessionStorage
-      const storedHistory = sessionStorage.getItem(HISTORY_KEY);
-      if (storedHistory) {
-        const history = JSON.parse(storedHistory);
-        setQuestionHistory(history);
-
-        // If there's history, resume from last question
-        if (history.length > 0) {
-          const lastIndex = history.length - 1;
-          setCurrentHistoryIndex(lastIndex);
-          const lastQuestionId = history[lastIndex];
-          const lastQuestion = questions.find((q) => q.id === lastQuestionId);
-          if (lastQuestion) {
-            setCurrentQuestion(lastQuestion);
-          }
-        }
-      }
-
-      setIsInitialized(true);
-    } catch (error) {
-      console.error("Error loading quiz state:", error);
-      setIsInitialized(true);
     }
-  }, [questions]);
+
+    // If we have stored state, return it
+    if (currentQ) {
+      return {
+        currentQuestion: currentQ,
+        seenQuestionIds: seenIds,
+        questionHistory: history,
+        currentHistoryIndex: historyIndex,
+      };
+    }
+
+    // Otherwise, start with a random question
+    const unseenQuestions = questions.filter((q) => !seenIds.has(q.id));
+    if (unseenQuestions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * unseenQuestions.length);
+      const randomQuestion = unseenQuestions[randomIndex];
+      return {
+        currentQuestion: randomQuestion,
+        seenQuestionIds: new Set([randomQuestion.id]),
+        questionHistory: [randomQuestion.id],
+        currentHistoryIndex: 0,
+      };
+    }
+
+    return {
+      currentQuestion: null,
+      seenQuestionIds: new Set(),
+      questionHistory: [],
+      currentHistoryIndex: 0,
+    };
+  } catch {
+    return {
+      currentQuestion: null,
+      seenQuestionIds: new Set(),
+      questionHistory: [],
+      currentHistoryIndex: 0,
+    };
+  }
+}
+
+const initialState: QuizState = {
+  currentQuestion: null,
+  seenQuestionIds: new Set(),
+  questionHistory: [],
+  currentHistoryIndex: 0,
+  isInitialized: false,
+};
+
+export function QuizClient({ questions }: QuizClientProps) {
+  const [state, dispatch] = useReducer(quizReducer, initialState);
+  const { currentQuestion, seenQuestionIds, questionHistory, currentHistoryIndex, isInitialized } = state;
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Get random unseen question
-  const getRandomUnseenQuestion = (): Question | null => {
-    const unseenQuestions = questions.filter((q) => !seenQuestionIds.has(q.id));
+  const getRandomUnseenQuestion = useCallback((excludeIds: Set<number>): Question | null => {
+    const unseenQuestions = questions.filter((q) => !excludeIds.has(q.id));
 
     if (unseenQuestions.length === 0) {
       return null;
@@ -94,20 +169,13 @@ export function QuizClient({ questions }: QuizClientProps) {
 
     const randomIndex = Math.floor(Math.random() * unseenQuestions.length);
     return unseenQuestions[randomIndex];
-  };
+  }, [questions]);
 
-  // Initialize with random question after state is loaded
+  // Load state from storage on mount
   useEffect(() => {
-    if (isInitialized && !currentQuestion) {
-      const randomQuestion = getRandomUnseenQuestion();
-      if (randomQuestion) {
-        setCurrentQuestion(randomQuestion);
-        setQuestionHistory([randomQuestion.id]);
-        setCurrentHistoryIndex(0);
-        setSeenQuestionIds(new Set([randomQuestion.id]));
-      }
-    }
-  }, [isInitialized]);
+    const loadedState = loadInitialState(questions);
+    dispatch({ type: "INITIALIZE", payload: loadedState });
+  }, [questions]);
 
   // Save seen questions to localStorage
   useEffect(() => {
@@ -140,14 +208,19 @@ export function QuizClient({ questions }: QuizClientProps) {
 
     if (isAtEndOfHistory) {
       // Get a new random unseen question
-      const nextQuestion = getRandomUnseenQuestion();
+      const nextQuestion = getRandomUnseenQuestion(seenQuestionIds);
 
       if (nextQuestion) {
-        setCurrentQuestion(nextQuestion);
         const newHistory = [...questionHistory, nextQuestion.id];
-        setQuestionHistory(newHistory);
-        setCurrentHistoryIndex(newHistory.length - 1);
-        setSeenQuestionIds(new Set([...seenQuestionIds, nextQuestion.id]));
+        dispatch({
+          type: "NEXT_QUESTION",
+          payload: {
+            question: nextQuestion,
+            newHistory,
+            newHistoryIndex: newHistory.length - 1,
+            newSeenIds: new Set([...seenQuestionIds, nextQuestion.id]),
+          },
+        });
         setIsDrawerOpen(false);
       }
     } else {
@@ -157,8 +230,10 @@ export function QuizClient({ questions }: QuizClientProps) {
       const nextQuestion = questions.find((q) => q.id === nextQuestionId);
 
       if (nextQuestion) {
-        setCurrentQuestion(nextQuestion);
-        setCurrentHistoryIndex(nextIndex);
+        dispatch({
+          type: "SET_QUESTION",
+          payload: { question: nextQuestion, historyIndex: nextIndex },
+        });
         setIsDrawerOpen(false);
       }
     }
@@ -172,8 +247,10 @@ export function QuizClient({ questions }: QuizClientProps) {
     const previousQuestion = questions.find((q) => q.id === previousQuestionId);
 
     if (previousQuestion) {
-      setCurrentQuestion(previousQuestion);
-      setCurrentHistoryIndex(previousIndex);
+      dispatch({
+        type: "SET_QUESTION",
+        payload: { question: previousQuestion, historyIndex: previousIndex },
+      });
       setIsDrawerOpen(false);
     }
   };
@@ -187,8 +264,10 @@ export function QuizClient({ questions }: QuizClientProps) {
     const question = questions.find((q) => q.id === questionId);
 
     if (question) {
-      setCurrentQuestion(question);
-      setCurrentHistoryIndex(index);
+      dispatch({
+        type: "SET_QUESTION",
+        payload: { question, historyIndex: index },
+      });
       setIsDrawerOpen(false);
     }
   };
@@ -197,16 +276,11 @@ export function QuizClient({ questions }: QuizClientProps) {
     try {
       localStorage.removeItem(SEEN_QUESTIONS_KEY);
       sessionStorage.removeItem(HISTORY_KEY);
-      setSeenQuestionIds(new Set());
-      setQuestionHistory([]);
 
       // Get a new random question
       const randomQuestion =
         questions[Math.floor(Math.random() * questions.length)];
-      setCurrentQuestion(randomQuestion);
-      setQuestionHistory([randomQuestion.id]);
-      setCurrentHistoryIndex(0);
-      setSeenQuestionIds(new Set([randomQuestion.id]));
+      dispatch({ type: "RESET", payload: { question: randomQuestion } });
       setIsDrawerOpen(false);
     } catch (error) {
       console.error("Error resetting quiz:", error);
