@@ -5,7 +5,7 @@ import { GridPattern } from "@/components/grid-pattern";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Quiz Mode | sfe.dev",
+  title: "Quiz Mode | sfe",
   description: "Test your frontend knowledge with random interview questions",
 };
 
@@ -20,7 +20,7 @@ export default function QuizPage() {
         strokeDasharray={"8 4"}
         className={cn(
           "mask-[radial-gradient(800px_circle_at_center_bottom,white,transparent)]",
-          "fixed inset-0"
+          "fixed inset-0",
         )}
       />
       <QuizClient questions={questionsWithAnswers} />

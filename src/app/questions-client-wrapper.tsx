@@ -27,6 +27,9 @@ export function QuestionsPageClient({ questions }: QuestionsPageClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const allDifficulties = ["Easy", "Medium", "Hard"];
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return searchParams.get("search") || "";
+  });
 
   const allTags = useMemo(() => {
     const uniqueTags = new Set<string>();
@@ -51,9 +54,24 @@ export function QuestionsPageClient({ questions }: QuestionsPageClientProps) {
     };
   });
 
-  const [searchQuery, setSearchQuery] = useState(() => {
-    return searchParams.get("search") || "";
-  });
+  // Filter questions based on difficulties, tags, and searchQuery
+  const filteredQuestions = useMemo(() => {
+    let base: Question[] = questions;
+    if (filters?.difficulties?.length) {
+      base = base.filter((item) =>
+        filters.difficulties.includes(item.difficulty),
+      );
+    }
+    if (filters?.tags?.length) {
+      base = base.filter((item) => filters.tags.includes(item.tags));
+    }
+    // Search filter - matches title (case-insensitive)
+    if (searchQuery.trim()) {
+      const query = searchQuery.trim().toLowerCase();
+      base = base.filter((item) => item.title.toLowerCase().includes(query));
+    }
+    return base;
+  }, [filters, questions, searchQuery]);
 
   // Update URL when filters change
   useEffect(() => {
@@ -88,7 +106,7 @@ export function QuestionsPageClient({ questions }: QuestionsPageClientProps) {
             Frontend Interview Prep
           </h1>
           <p className="text-muted-foreground mt-1 text-sm">
-            {`Showing ${questions.length} questions`}
+            Showing <b>{filteredQuestions.length}</b> questions
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -112,11 +130,7 @@ export function QuestionsPageClient({ questions }: QuestionsPageClientProps) {
         className="mb-6"
       />
 
-      <Questions
-        questions={questions}
-        filters={filters}
-        searchQuery={searchQuery}
-      />
+      <Questions questions={filteredQuestions} />
     </div>
   );
 }

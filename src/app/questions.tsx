@@ -18,18 +18,9 @@ type Question = {
 
 interface QuestionsProps {
   questions: Question[];
-  filters?: {
-    difficulties: string[];
-    tags: string[];
-  };
-  searchQuery?: string;
 }
 
-export function Questions({
-  questions,
-  filters,
-  searchQuery = "",
-}: QuestionsProps) {
+export function Questions({ questions }: QuestionsProps) {
   const [answerById, setAnswerById] = useState<Record<number, string>>({});
   const [open, setOpen] = useState(false);
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -61,25 +52,6 @@ export function Questions({
     };
   }, []);
 
-  // Compute filtered list
-  const filteredQuestions = useMemo(() => {
-    let base: Question[] = questions;
-    if (filters?.difficulties?.length) {
-      base = base.filter((item) =>
-        filters.difficulties.includes(item.difficulty),
-      );
-    }
-    if (filters?.tags?.length) {
-      base = base.filter((item) => filters.tags.includes(item.tags));
-    }
-    // Search filter - matches title (case-insensitive)
-    if (searchQuery.trim()) {
-      const query = searchQuery.trim().toLowerCase();
-      base = base.filter((item) => item.title.toLowerCase().includes(query));
-    }
-    return base;
-  }, [filters, questions, searchQuery]);
-
   const active = useMemo(() => {
     if (!questions || activeId == null) return null;
     const q = questions.find((x) => x.id === activeId);
@@ -93,7 +65,7 @@ export function Questions({
   return (
     <>
       <div className="grid gap-4">
-        {filteredQuestions.map((q) => (
+        {questions.map((q) => (
           <Card
             key={q.id}
             className="hover:bg-accent/20 focus-visible:ring-ring/60 cursor-pointer backdrop-blur-sm focus:outline-none focus-visible:ring-1"
