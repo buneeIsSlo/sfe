@@ -8,6 +8,8 @@ import { QuestionFilters } from "@/components/question-filters";
 import { Questions } from "./questions";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
+import { ScrollToTop } from "@/components/scroll-to-top";
+import { ScrollButton } from "@/components/scroll-button";
 
 type Question = {
   id: number;
@@ -99,38 +101,50 @@ export function QuestionsPageClient({ questions }: QuestionsPageClientProps) {
   }, [filters, searchQuery, router, allDifficulties.length]);
 
   return (
-    <div className="relative z-10 mx-auto flex min-h-screen max-w-3xl flex-col px-4 py-12">
-      <header className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Frontend Interview Prep
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Showing <b>{filteredQuestions.length}</b> questions
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/quiz">
-              <BookOpen className="mr-2 size-4" />
-              Quiz Mode
-            </Link>
-          </Button>
-          <ThemeToggle />
-        </div>
-      </header>
+    <div className="relative z-10 mx-auto h-dvh w-full">
+      <ScrollToTop className="relative h-full w-full">
+        <div className="flex flex-col items-center">
+          <div className="flex w-full max-w-3xl flex-col px-4 py-12">
+            <header className="mb-6 flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  Frontend Interview Prep
+                </h1>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Showing <b>{filteredQuestions.length}</b> questions
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/quiz">
+                    <BookOpen className="mr-2 size-4" />
+                    Quiz Mode
+                  </Link>
+                </Button>
+                <ThemeToggle />
+              </div>
+            </header>
 
-      <QuestionFilters
-        difficulties={allDifficulties}
-        tags={allTags}
-        value={filters}
-        onChange={setFilters}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        className="mb-6"
-      />
+            <QuestionFilters
+              difficulties={allDifficulties}
+              tags={allTags}
+              value={filters}
+              onChange={setFilters}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              className="mb-6"
+            />
 
-      <Questions questions={filteredQuestions} />
+            <Questions questions={filteredQuestions} />
+          </div>
+        </div>
+
+        <div className="pointer-events-none fixed right-6 bottom-6 z-50 md:right-8 md:bottom-8">
+          <div className="pointer-events-auto">
+            <ScrollButton />
+          </div>
+        </div>
+      </ScrollToTop>
     </div>
   );
 }
