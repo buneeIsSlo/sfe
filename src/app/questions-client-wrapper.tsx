@@ -75,6 +75,19 @@ export function QuestionsPageClient({ questions }: QuestionsPageClientProps) {
     return base;
   }, [filters, questions, searchQuery]);
 
+  // Toggle a specific tag in filters
+  function toggleTag(tag: string) {
+    setFilters((prev) => {
+      const next = new Set(prev.tags);
+      if (next.has(tag)) {
+        next.delete(tag);
+      } else {
+        next.add(tag);
+      }
+      return { ...prev, tags: Array.from(next) };
+    });
+  }
+
   // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
@@ -135,7 +148,11 @@ export function QuestionsPageClient({ questions }: QuestionsPageClientProps) {
               className="mb-6"
             />
 
-            <Questions questions={filteredQuestions} />
+            <Questions
+              questions={filteredQuestions}
+              selectedTags={filters.tags}
+              onTagClick={toggleTag}
+            />
           </div>
         </div>
 

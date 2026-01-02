@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnswerDrawer } from "@/components/answer-drawer";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getDifficultyColors, getTagColor } from "@/lib/utils";
+import { cn, getDifficultyColors, getTagColor } from "@/lib/utils";
 
 type Question = {
   id: number;
@@ -18,9 +18,15 @@ type Question = {
 
 interface QuestionsProps {
   questions: Question[];
+  selectedTags: string[];
+  onTagClick: (tag: string) => void;
 }
 
-export function Questions({ questions }: QuestionsProps) {
+export function Questions({
+  questions,
+  selectedTags,
+  onTagClick,
+}: QuestionsProps) {
   const [answerById, setAnswerById] = useState<Record<number, string>>({});
   const [open, setOpen] = useState(false);
   const [activeId, setActiveId] = useState<number | null>(null);
@@ -97,7 +103,18 @@ export function Questions({ questions }: QuestionsProps) {
                     })()}
                   </CardTitle>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                    <Badge className={getTagColor(q.tags).className}>
+                    <Badge
+                      className={cn(
+                        getTagColor(q.tags).className,
+                        "cursor-pointer transition-all hover:scale-105",
+                        selectedTags.includes(q.tags) &&
+                          "ring-primary ring-offset-background ring-1 ring-offset-[0.5]",
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onTagClick(q.tags);
+                      }}
+                    >
                       {q.tags}
                     </Badge>
                     <span className="text-muted-foreground text-xs">•</span>
